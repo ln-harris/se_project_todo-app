@@ -33,7 +33,7 @@ This project focuses on writing modular, maintainable JavaScript and practicing 
 
 ## 🚀 Deployment
 
-🖥️ Live Site: [Click here to View Project Demo](https://github.com/ln-harris/se_project_todo-app/)
+🖥️ Live Site: [Click here to View Project Demo](https://ln-harris.github.io/se_project_todo-app/)
 
 ![Todo App Preview](./images/todoapp_sample1.png)
 ![Todo App Preview](./images/todoapp_sample2.png)
