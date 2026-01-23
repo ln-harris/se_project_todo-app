@@ -34,7 +34,9 @@ class Todo {
 
     todoNameEl.textContent = this._data.name;
 
+    if (this._data.date) {
     const due = new Date(this._data.date);
+
     if (!Number.isNaN(due.getTime())) {
       todoDateEl.textContent = `Due: ${due.toLocaleString("en-US", {
         year: "numeric",
@@ -43,7 +45,10 @@ class Todo {
       })}`;
     } else {
       todoDateEl.textContent = "";
-    }
+     }
+    } else {
+    todoDateEl.textContent = "";
+  }
 
     this._generateCheckboxEl();
     this._setEventListeners();
