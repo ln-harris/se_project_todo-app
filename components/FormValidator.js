@@ -61,7 +61,7 @@ class FormValidator {
     });
   }
 
-  resetValidation() {
+resetValidation() {
   this._formEl.reset();
 
   this._inputList.forEach((inputElement) => {

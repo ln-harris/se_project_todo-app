@@ -1,7 +1,10 @@
 class Todo {
-  constructor(data, selector) {
+    constructor(data, selector, { handleToggle, handleDelete } = {}) {
     this._data = data;
     this._templateElement = document.querySelector(selector);
+
+    this._handleToggle = handleToggle;
+    this._handleDelete = handleDelete;
   }
 
   _setEventListeners() {
@@ -35,13 +38,13 @@ class Todo {
     todoNameEl.textContent = this._data.name;
 
     if (this._data.date) {
-    const due = new Date(this._data.date);
+      const due = new Date(this._data.date);
 
-    if (!Number.isNaN(due.getTime())) {
-      todoDateEl.textContent = `Due: ${due.toLocaleString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
+      if (!Number.isNaN(due.getTime())) {
+        todoDateEl.textContent = `Due: ${due.toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
       })}`;
     } else {
       todoDateEl.textContent = "";
