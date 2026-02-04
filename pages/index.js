@@ -3,49 +3,56 @@ import { v4 as uuidv4 } from "https://jspm.dev/uuid";
 import { initialTodos, validationConfig } from "../utils/constants.js";
 import Todo from "../components/Todo.js";
 import FormValidator from "../components/FormValidator.js";
+import Section from "../components/Section.js";
+import PopupWithForm from "../components/PopupWithForm.js";
+import TodoCounter from "../components/TodoCounter.js";
 
+// ================= DOM ELEMENTS =================
 const addTodoButton = document.querySelector(".button_action_add");
 const addTodoPopup = document.querySelector("#add-todo-popup");
 const addTodoForm = addTodoPopup.querySelector(".popup__form");
-const addTodoCloseBtn = addTodoPopup.querySelector(".popup__close");
-const todosList = document.querySelector(".todos__list");
 
-const openModal = (modal) => {
-  modal.classList.add("popup_visible");
-};
+// ================= COUNTER =================
+// TODO: make sure this selector matches your HTML
+const todoCounter = new TodoCounter(initialTodos, ".counter__text");
 
-const closeModal = (modal) => {
-  modal.classList.remove("popup_visible");
-};
-
-// Creates a Todo instance and returns its DOM element
+// ================= TODO CREATION =================
 const generateTodo = (data) => {
-  const todo = new Todo(data, "#todo-template");
+  const todo = new Todo(data, "#todo-template", {
+    handleToggle: (increment) => {
+      // increment: true when becoming completed, false when becoming not completed
+      todoCounter.updateCompleted(increment);
+    },
+    handleDelete: () => {
+      // total always decreases on delete
+      todoCounter.updateTotal(false);
+    },
+  });
+
   return todo.getView();
 };
 
-// Reusable “generate + append” helper (DRY)
-const renderTodo = (data) => {
-  const todoElement = generateTodo(data);
-  todosList.append(todoElement);
-};
-
-addTodoButton.addEventListener("click", () => {
-  openModal(addTodoPopup);
+// ================= SECTION =================
+const section = new Section({
+  items: initialTodos,
+  renderer: (item) => {
+    const todoElement = generateTodo(item);
+    section.addItem(todoElement);
+  },
+  containerSelector: ".todos__list",
 });
 
-addTodoCloseBtn.addEventListener("click", () => {
-  closeModal(addTodoPopup);
-});
+// render initial todos on page load
+section.renderItems();
 
+// ================= VALIDATION =================
 const newTodoValidator = new FormValidator(validationConfig, addTodoForm);
 newTodoValidator.enableValidation();
 
-addTodoForm.addEventListener("submit", (evt) => {
-  evt.preventDefault();
-
-  const name = evt.target.name.value;
-  const dateInput = evt.target.date.value;
+// ================= POPUP WITH FORM =================
+const addTodoPopupInstance = new PopupWithForm("#add-todo-popup", (inputValues) => {
+  const name = inputValues.name;
+  const dateInput = inputValues.date;
 
   let date = null;
   if (dateInput) {
@@ -54,14 +61,29 @@ addTodoForm.addEventListener("submit", (evt) => {
   }
 
   const id = uuidv4();
-  const values = { name, date, id };
 
-  renderTodo(values);
+  const values = {
+    name,
+    date,
+    id,
+    completed: false,
+  };
 
+  // add to DOM
+  const todoElement = generateTodo(values);
+  section.addItem(todoElement);
+
+  // update counter total (+1)
+  todoCounter.updateTotal(true);
+
+  // reset + close
   newTodoValidator.resetValidation();
-  closeModal(addTodoPopup);
+  addTodoPopupInstance.close();
 });
 
-initialTodos.forEach((item) => {
-  renderTodo(item);
+addTodoPopupInstance.setEventListeners();
+
+// ================= OPEN POPUP (keep this) =================
+addTodoButton.addEventListener("click", () => {
+  addTodoPopupInstance.open();
 });
