@@ -20,12 +20,14 @@ const todoCounter = new TodoCounter(initialTodos, ".counter__text");
 const generateTodo = (data) => {
   const todo = new Todo(data, "#todo-template", {
     handleToggle: (increment) => {
-      // increment: true when becoming completed, false when becoming not completed
       todoCounter.updateCompleted(increment);
     },
-    handleDelete: () => {
-      // total always decreases on delete
+    handleDelete: (wasCompleted) => {
       todoCounter.updateTotal(false);
+
+      if (wasCompleted) {
+        todoCounter.updateCompleted(false);
+      }
     },
   });
 
@@ -50,36 +52,39 @@ const newTodoValidator = new FormValidator(validationConfig, addTodoForm);
 newTodoValidator.enableValidation();
 
 // ================= POPUP WITH FORM =================
-const addTodoPopupInstance = new PopupWithForm("#add-todo-popup", (inputValues) => {
-  const name = inputValues.name;
-  const dateInput = inputValues.date;
+const addTodoPopupInstance = new PopupWithForm(
+  "#add-todo-popup",
+  (inputValues) => {
+    const name = inputValues.name;
+    const dateInput = inputValues.date;
 
-  let date = null;
-  if (dateInput) {
-    date = new Date(dateInput);
-    date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-  }
+    let date = null;
+    if (dateInput) {
+      date = new Date(dateInput);
+      date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+    }
 
-  const id = uuidv4();
+    const id = uuidv4();
 
-  const values = {
-    name,
-    date,
-    id,
-    completed: false,
-  };
+    const values = {
+      name,
+      date,
+      id,
+      completed: false,
+    };
 
-  // add to DOM
-  const todoElement = generateTodo(values);
-  section.addItem(todoElement);
+    // add to DOM
+    const todoElement = generateTodo(values);
+    section.addItem(todoElement);
 
-  // update counter total (+1)
-  todoCounter.updateTotal(true);
+    // update counter total (+1)
+    todoCounter.updateTotal(true);
 
-  // reset + close
-  newTodoValidator.resetValidation();
-  addTodoPopupInstance.close();
-});
+    // reset + close
+    newTodoValidator.resetValidation();
+    addTodoPopupInstance.close();
+  },
+);
 
 addTodoPopupInstance.setEventListeners();
 

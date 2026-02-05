@@ -1,5 +1,5 @@
 class Todo {
-    constructor(data, selector, { handleToggle, handleDelete } = {}) {
+  constructor(data, selector, { handleToggle, handleDelete } = {}) {
     this._data = data;
     this._templateElement = document.querySelector(selector);
 
@@ -9,10 +9,21 @@ class Todo {
 
   _setEventListeners() {
     this._todoCheckboxEl.addEventListener("change", () => {
-      this._data.completed = !this._data.completed;
+      const isCompleted = this._todoCheckboxEl.checked;
+      this._data.completed = isCompleted;
+
+      // notify counter/observer
+      if (this._handleToggle) {
+        this._handleToggle(isCompleted);
+      }
     });
 
     this._todoDeleteBtn.addEventListener("click", () => {
+      // notify counter/observer BEFORE removing
+      if (this._handleDelete) {
+        this._handleDelete(this._data.completed); // pass wasCompleted
+      }
+
       this._todoElement.remove();
     });
   }
@@ -22,7 +33,7 @@ class Todo {
     this._todoLabel = this._todoElement.querySelector(".todo__label");
 
     this._todoCheckboxEl.id = `todo-${this._data.id}`;
-    this._todoCheckboxEl.checked = this._data.completed;
+    this._todoCheckboxEl.checked = Boolean(this._data.completed);
     this._todoLabel.setAttribute("for", `todo-${this._data.id}`);
   }
 
@@ -45,13 +56,13 @@ class Todo {
           year: "numeric",
           month: "short",
           day: "numeric",
-      })}`;
+        })}`;
+      } else {
+        todoDateEl.textContent = "";
+      }
     } else {
       todoDateEl.textContent = "";
-     }
-    } else {
-    todoDateEl.textContent = "";
-  }
+    }
 
     this._generateCheckboxEl();
     this._setEventListeners();
